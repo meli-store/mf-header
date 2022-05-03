@@ -6,9 +6,5 @@ export const routes = [
   {
     name: "Carrito",
     path: "/carrito",
-  },
-  {
-    name: "Login",
-    path: "/login",
-  },
+  }
 ];

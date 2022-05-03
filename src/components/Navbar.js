@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { routes } from "../helpers/header-helper";
 import { Searchbar } from "./Searchbar";
 import { getProductsByKeyword, setProducts } from "@meli-store/api";
@@ -9,9 +9,14 @@ export const Navbar = () => {
   const [data, setData] = useState({
     keyword: "",
     products: {},
+    loggedIn: false,
   });
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    sesionHandler();
+  }, [])
 
   useEffect(() => {
     getProductsByKeyword(data.keyword).then(({ results }) => {
@@ -21,9 +26,55 @@ export const Navbar = () => {
     });
   }, [data.keyword]);
 
+  useEffect(() => {
+    authOption = renderAuthOption();
+  }, [data.loggedIn]);
+
   const searchHandler = (keyword) => {
     setData({ ...data, keyword });
   };
+
+  const sesionHandler = () => {
+    const token = window.localStorage.getItem("token");
+    if (token) {
+      setData({ ...data, loggedIn: true });
+    }
+  }
+
+  const closeSesionHandler = () => {
+    window.localStorage.removeItem("token");
+  }
+
+  const renderAuthOption = () => {
+    const token = window.localStorage.getItem("token");
+    if (token) {
+      return (
+        <li className="nav-item" onClick={closeSesionHandler}>
+          <Link
+            to={"/"}
+            className="nav-link"
+          >
+            {"Cerrar Sesión"}
+          </Link>
+        </li>
+      )
+    } else {
+      return (
+        <li className="nav-item" key={"/login"}>
+          <NavLink
+            to={"login"}
+            className={({ isActive }) =>
+              "nav-link " + (isActive ? "active" : "")
+            }
+          >
+            {"Login"}
+          </NavLink>
+        </li>
+      )
+    }
+  }
+
+  let authOption = renderAuthOption();
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -56,6 +107,7 @@ export const Navbar = () => {
                 </NavLink>
               </li>
             ))}
+            {authOption}
           </ul>
           <Searchbar query={"Hola"} searchHandler={searchHandler} />
         </div>
